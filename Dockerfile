@@ -16,7 +16,8 @@ COPY test.sh /tmp/test.sh
 RUN chmod +x /tmp/test.sh
 
 ENV SHA1=HEAD \
- CLONE_URL=git@github.com:fago/rules.git
+ BRANCH=7.x \
+ CLONE_URL=https://github.com/drupal/drupal.git
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["/tmp/test.sh"]

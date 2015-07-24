@@ -8,7 +8,7 @@ handleSigTerm()
 oneTimeSetUp()
 {
         trap "handleSigTerm" TERM
-	git clone --depth 10 ${CLONE_URL} /tmp/test
+	git clone --depth 10 --branch ${BRANCH} ${CLONE_URL} /tmp/test
 	cd /tmp/test
 	git checkout ${SHA1}
 	git reset ${SHA1}
