@@ -16,13 +16,15 @@ COPY test.sh /tmp/test.sh
 RUN chmod +x /tmp/test.sh
 
 RUN mkdir /root/.ssh
-RUN echo "Host github.com\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
+RUN echo "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile /dev/null\n" >> /root/.ssh/config
+
+VOLUME /reports
 
 ENV SHA1=HEAD \
  BRANCH=7.x \
- FORMAT=full \
+ FORMAT=checkstyle \
  DEBUG=FALSE \
  CLONE_URL=https://github.com/drupal/drupal.git
 
-ENTRYPOINT ["/bin/bash"]
+# ENTRYPOINT ["/bin/bash"]
 CMD ["/tmp/test.sh"]
