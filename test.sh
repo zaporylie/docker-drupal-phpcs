@@ -1,13 +1,10 @@
 #!/bin/bash
 
-handleSigTerm()
-{
-        echo SIGTERM
-}
+	if [ -e "/tmp/.ssh/id_rsa" ]; then
+		cp /tmp/.ssh/id_rsa ~/.ssh/id_rsa
+		chmod 400 ~/.ssh/id_rsa
+	fi
 
-oneTimeSetUp()
-{
-	trap "handleSigTerm" TERM
 	if [ ${DEBUG} = TRUE ]; then
 		ls -la $(dirname ${SSH_AUTH_SOCK})
 		cat /root/.ssh/config
@@ -23,9 +20,7 @@ oneTimeSetUp()
 	cd /tmp/test
 	git checkout ${SHA1}
 	git reset ${SHA1}
-}
-
-testPHPCodeSniffer() {
+	
 	if [ ${DEBUG} = TRUE ]; then
 		git log --pretty=oneline
 	fi
@@ -33,12 +28,8 @@ testPHPCodeSniffer() {
 	FILES=$(git diff --diff-filter=ACMRTUXB --name-only HEAD~1 | tr "\\n" " ")
 
 	if [ -z "$FILES" ]; then
-		exit 0;
+		exit 1;
 	fi
 
-	$HOME/.composer/vendor/bin/phpcs --standard=$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal --extensions="php,module,inc,install,test,profile,theme,js,css,info,txt" --report-${FORMAT}=/reports/checkstyle.xml --report-full $FILES
+	$HOME/.composer/vendor/bin/phpcs --standard=$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal --extensions="php,module,inc,install,test,profile,theme,js,css,info,txt" --report-${FORMAT}=/reports/${FORMAT}.xml --report-full $FILES
 
-	assertEquals 0 $?
-}
-
-. shunit2
