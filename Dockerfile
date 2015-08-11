@@ -21,10 +21,10 @@ RUN echo "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile /dev/null\n" 
 VOLUME /reports
 
 ENV SHA1=HEAD \
+ SHA1_BEFORE=HEAD~1 \
  BRANCH=7.x \
  FORMAT=checkstyle \
  DEBUG=FALSE \
  CLONE_URL=https://github.com/drupal/drupal.git
 
-# ENTRYPOINT ["/bin/bash"]
 CMD ["/tmp/test.sh"]
