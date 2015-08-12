@@ -19,12 +19,16 @@ RUN mkdir /root/.ssh
 RUN echo "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile /dev/null\n" >> /root/.ssh/config
 
 VOLUME /reports
+VOLUME /workspace
 
-ENV SHA1=HEAD \
- SHA1_BEFORE=HEAD~1 \
- BRANCH=7.x \
- FORMAT=checkstyle \
- DEBUG=FALSE \
- CLONE_URL=https://github.com/drupal/drupal.git
+ENV GIT_AFTER=HEAD \
+ GIT_BEFORE=HEAD~1 \
+ GIT_CLONE_PATH=/workspace \
+ GIT_CLONE_URL=https://github.com/drupal/drupal.git \
+ GIT_BRANCH=7.x \
+ REPORT_FORMAT=checkstyle \
+ REPORT_PATH=/reports \
+ REPORT_FILENAME=checkstyle-result.xml \
+ DEBUG=FALSE
 
 CMD ["/tmp/test.sh"]

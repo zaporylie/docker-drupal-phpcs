@@ -6,29 +6,32 @@ if [ -e "/tmp/.ssh/id_rsa" ]; then
 fi
 
 if [ ${DEBUG} = TRUE ]; then
-#	ls -la $(dirname ${SSH_AUTH_SOCK})
 	cat /root/.ssh/config
 fi
 
-git clone --depth 20 --branch ${BRANCH} ${CLONE_URL} /tmp/test
+if [ -d "${GIT_CLONE_PATH}" ]; then
+	rm -rf ${GIT_CLONE_PATH}
+fi
+
+git clone --depth 20 --branch ${GIT_BRANCH} ${GIT_CLONE_URL} ${GIT_CLONE_PATH}
 
 # Check if error.
 if [ $? -ne 0 ]; then
 	exit $?
 fi
 
-cd /tmp/test
-git checkout ${SHA1}
-git reset ${SHA1}
+cd ${GIT_CLONE_PATH}
+git checkout ${GIT_AFTER}
+git reset ${GIT_AFTER}
 
 if [ ${DEBUG} = TRUE ]; then
 	git log --pretty=oneline
 fi
 
-FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${SHA1_BEFORE} | tr "\\n" " ")
+FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} | tr "\\n" " ")
 
 if [ -z "$FILES" ]; then
 	exit 1;
 fi
 
-$HOME/.composer/vendor/bin/phpcs --standard=$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal --extensions="php,module,inc,install,test,profile,theme,js,css,info,txt" --report-${FORMAT}=/reports/${FORMAT}.xml --report-full $FILES
+$HOME/.composer/vendor/bin/phpcs --standard=$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal --extensions="php,module,inc,install,test,profile,theme,js,css,info,txt" --report-${REPORT_FORMAT}=${REPORT_PATH}/${REPORT_FILENAME} --report-full $FILES
