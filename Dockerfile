@@ -1,19 +1,14 @@
 FROM ubuntu:trusty
 
+MAINTAINER Jakub Piasecki <jakub@piaseccy.pl>
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
-  && apt-get -yq install shunit2 curl php5 php5-curl
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get -yq install git
-
-RUN apt-get clean \
+  && apt-get -yq install shunit2 curl php5 php5-curl git \
+  && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
  && composer global require drupal/coder  
-
-COPY test.sh /tmp/test.sh
-RUN chmod +x /tmp/test.sh
 
 RUN mkdir /root/.ssh
 RUN echo "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile /dev/null\n" >> /root/.ssh/config
@@ -30,5 +25,9 @@ ENV GIT_AFTER=HEAD \
  REPORT_PATH=/reports \
  REPORT_FILENAME=checkstyle-result.xml \
  DEBUG=FALSE
+
+COPY test.sh /tmp/test.sh
+
+RUN chmod +x /tmp/test.sh
 
 CMD ["/tmp/test.sh"]
