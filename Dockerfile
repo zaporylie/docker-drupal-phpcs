@@ -1,9 +1,9 @@
-FROM ubuntu:trusty
+FROM drupaldocker/php:fpm
 
 MAINTAINER Jakub Piasecki <jakub@piaseccy.pl>
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
-  && apt-get -yq install shunit2 curl php5 php5-curl git \
+  && apt-get -yq install shunit2 curl git \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -24,6 +24,8 @@ ENV GIT_AFTER=HEAD \
  REPORT_FORMAT=checkstyle \
  REPORT_PATH=/reports \
  REPORT_FILENAME=checkstyle-result.xml \
+ EXTENSIONS=".php\|.module\|.inc\|.install\|.test\|.profile\|.theme\|.js\|.css\|.info\|.txt" \
+ INCLUDE="/" \
  DEBUG=FALSE
 
 COPY test.sh /tmp/test.sh

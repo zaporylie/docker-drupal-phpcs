@@ -28,10 +28,10 @@ if [ ${DEBUG} = TRUE ]; then
 	git log --pretty=oneline
 fi
 
-FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} | tr "\\n" " ")
+FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} | grep ${EXTENSIONS} | grep ${INCLUDE} | tr "\\n" " ")
 
 if [ -z "$FILES" ]; then
 	exit 1;
 fi
 
-$HOME/.composer/vendor/bin/phpcs --standard=$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal --extensions="php,module,inc,install,test,profile,theme,js,css,info,txt" --report-${REPORT_FORMAT}=${REPORT_PATH}/${REPORT_FILENAME} --report-full $FILES
+$HOME/.composer/vendor/bin/phpcs --standard=$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal --report-${REPORT_FORMAT}=${REPORT_PATH}/${REPORT_FILENAME} --report-full $FILES
