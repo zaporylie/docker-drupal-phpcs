@@ -63,7 +63,7 @@ if [ ${DEBUG} = TRUE ]; then
 fi
 
 if [ -z "$FILES" ]; then
-	exit 1;
+	exit 0;
 fi
 
 $HOME/.composer/vendor/bin/phpcs --standard=$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal --report-${REPORT_FORMAT}=${REPORT_PATH}/${REPORT_FILENAME} --report-full $FILES
