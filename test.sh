@@ -39,17 +39,24 @@ if [ ${DEBUG} = TRUE ]; then
 	git log --pretty=oneline
 fi
 
+IFS='|' read -r -a EXTENSIONS_ARRAY <<< "${EXTENSIONS}"
+EXTENSIONS=""
+for element in "${EXTENSIONS_ARRAY[@]}"
+do
+    EXTENSIONS="${EXTENSIONS} *.$element"
+done
+
 if [ ${DEBUG} = TRUE ]; then
 	echo "all"
         git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE}
 	echo "only matching extensions: ${EXTENSIONS}"
-        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} | grep ${EXTENSIONS}
+        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} --${EXTENSIONS}
 	echo "only matching extensions ${EXTENSIONS} and include patternt ${INCLUDE}"
-        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} | grep ${EXTENSIONS} | grep ${INCLUDE}
+        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE}
 fi
 
 
-FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} | grep ${EXTENSIONS} | grep ${INCLUDE} | tr "\\n" " ")
+FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE} | tr "\\n" " ")
 
 if [ ${DEBUG} = TRUE ]; then
         echo ${FILES}

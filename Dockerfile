@@ -25,7 +25,7 @@ ENV GIT_AFTER=HEAD \
  REPORT_FORMAT=checkstyle \
  REPORT_PATH=/reports \
  REPORT_FILENAME=checkstyle-result.xml \
- EXTENSIONS=".php\|.module\|.inc\|.install\|.test\|.profile\|.theme\|.js\|.css\|.info\|.txt" \
+ EXTENSIONS="php|module|inc|install|test|profile|theme|js|css|info|txt" \
  INCLUDE="/" \
  DEBUG=FALSE
 
