@@ -21,10 +21,11 @@ ENV GIT_AFTER=HEAD \
  GIT_CLONE_PATH=/workspace \
  GIT_CLONE_URL=https://github.com/drupal/drupal.git \
  GIT_BRANCH=7.x \
+ GIT_DEPTH=20 \
  REPORT_FORMAT=checkstyle \
  REPORT_PATH=/reports \
  REPORT_FILENAME=checkstyle-result.xml \
- EXTENSIONS=".php\|.module\|.inc\|.install\|.test\|.profile\|.theme\|.js\|.css\|.info\|.txt" \
+ EXTENSIONS="php|module|inc|install|test|profile|theme|js|css|info|txt" \
  INCLUDE="/" \
  DEBUG=FALSE
 

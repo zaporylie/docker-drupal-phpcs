@@ -13,22 +13,54 @@ if [ -d "${GIT_CLONE_PATH}" ]; then
 	rm -rf ${GIT_CLONE_PATH}
 fi
 
-git clone --depth 20 --branch ${GIT_BRANCH} ${GIT_CLONE_URL} ${GIT_CLONE_PATH}
+git clone --depth ${GIT_DEPTH} --branch ${GIT_BRANCH} ${GIT_CLONE_URL} ${GIT_CLONE_PATH} > /dev/null 2>&1
 
 # Check if error.
 if [ $? -ne 0 ]; then
 	exit $?
 fi
 
-cd ${GIT_CLONE_PATH}
-git checkout ${GIT_AFTER}
-git reset ${GIT_AFTER}
+cd ${GIT_CLONE_PATH} > /dev/null 2>&1
+git checkout ${GIT_AFTER} > /dev/null 2>&1
+
+# Check if error.
+if [ $? -ne 0 ]; then
+        exit $?
+fi
+
+git reset ${GIT_AFTER} > /dev/null 2>&1
+
+# Check if error.
+if [ $? -ne 0 ]; then
+        exit $?
+fi
 
 if [ ${DEBUG} = TRUE ]; then
 	git log --pretty=oneline
 fi
 
-FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} | grep ${EXTENSIONS} | grep ${INCLUDE} | tr "\\n" " ")
+IFS='|' read -r -a EXTENSIONS_ARRAY <<< "${EXTENSIONS}"
+EXTENSIONS=""
+for element in "${EXTENSIONS_ARRAY[@]}"
+do
+    EXTENSIONS="${EXTENSIONS} *.$element"
+done
+
+if [ ${DEBUG} = TRUE ]; then
+	echo "all"
+        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE}
+	echo "only matching extensions: ${EXTENSIONS}"
+        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} --${EXTENSIONS}
+	echo "only matching extensions ${EXTENSIONS} and include patternt ${INCLUDE}"
+        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE}
+fi
+
+
+FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE} | tr "\\n" " ")
+
+if [ ${DEBUG} = TRUE ]; then
+        echo ${FILES}
+fi
 
 if [ -z "$FILES" ]; then
 	exit 1;
