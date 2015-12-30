@@ -9,29 +9,38 @@ if [ ${DEBUG} = TRUE ]; then
 	cat /root/.ssh/config
 fi
 
-if [ -d "${GIT_CLONE_PATH}" ]; then
-	rm -rf ${GIT_CLONE_PATH}
+if [ ${METHOD} = "http" ]; then
+	CLONE_URL="https://${SERVICE}/${USERNAME}/${REPOSITORY}.git"
+else
+	CLONE_URL="git@${SERVICE}:${USERNAME}/${REPOSITORY}.git"
 fi
 
-git clone --depth ${GIT_DEPTH} --branch ${GIT_BRANCH} ${GIT_CLONE_URL} ${GIT_CLONE_PATH} > /dev/null 2>&1
+if [ ${DEBUG} = TRUE ]; then
+	git clone --depth ${DEPTH} --branch ${BRANCH} ${CLONE_URL} ${CLONE_PATH} 2>&1
+else
+	git clone --depth ${DEPTH} --branch ${BRANCH} ${CLONE_URL} ${CLONE_PATH} > /dev/null 2>&1
+fi
 
 # Check if error.
 if [ $? -ne 0 ]; then
+	echo "Clone error"
 	exit $?
 fi
 
-cd ${GIT_CLONE_PATH} > /dev/null 2>&1
-git checkout ${GIT_AFTER} > /dev/null 2>&1
+cd ${CLONE_PATH} > /dev/null 2>&1
+git checkout ${SHA} > /dev/null 2>&1
 
 # Check if error.
 if [ $? -ne 0 ]; then
+	echo "Checkout error";
         exit $?
 fi
 
-git reset ${GIT_AFTER} > /dev/null 2>&1
+git reset ${SHA} > /dev/null 2>&1
 
 # Check if error.
 if [ $? -ne 0 ]; then
+	echo "Reset error"
         exit $?
 fi
 
@@ -48,22 +57,24 @@ done
 
 if [ ${DEBUG} = TRUE ]; then
 	echo "all"
-        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE}
+        git diff --diff-filter=ACMRTUXB --name-only ${SHA_BEFORE}
 	echo "only matching extensions: ${EXTENSIONS}"
-        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} --${EXTENSIONS}
-	echo "only matching extensions ${EXTENSIONS} and include patternt ${INCLUDE}"
-        git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE}
+        git diff --diff-filter=ACMRTUXB --name-only ${SHA_BEFORE} --${EXTENSIONS}
+	echo "only matching extensions ${EXTENSIONS} and include pattern ${INCLUDE}"
+        git diff --diff-filter=ACMRTUXB --name-only ${SHA_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE}
 fi
 
 
-FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${GIT_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE} | tr "\\n" " ")
-
-if [ ${DEBUG} = TRUE ]; then
-        echo ${FILES}
-fi
+FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${SHA_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE} | tr "\\n" " ")
 
 if [ -z "$FILES" ]; then
-	exit 0;
+        echo "No files"
+        exit 0;
+fi
+
+if [ ${DEBUG} = TRUE ]; then
+	echo "Files:"
+        echo ${FILES}
 fi
 
 $HOME/.composer/vendor/bin/phpcs --standard=$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal --report-${REPORT_FORMAT}=${REPORT_PATH}/${REPORT_FILENAME} --report-full $FILES

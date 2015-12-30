@@ -16,17 +16,20 @@ RUN echo "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile /dev/null\n" 
 VOLUME /reports
 VOLUME /workspace
 
-ENV GIT_AFTER=HEAD \
- GIT_BEFORE=HEAD~1 \
- GIT_CLONE_PATH=/workspace \
- GIT_CLONE_URL=https://github.com/drupal/drupal.git \
- GIT_BRANCH=7.x \
- GIT_DEPTH=20 \
- REPORT_FORMAT=checkstyle \
- REPORT_PATH=/reports \
- REPORT_FILENAME=checkstyle-result.xml \
+ENV SHA=HEAD \
+ SHA_BEFORE=HEAD~1 \
+ CLONE_PATH=/workspace \
+ SERVICE="github.com" \
+ USERNAME=drupal \
+ REPOSITORY=drupal \
+ METHOD=http \
+ BRANCH=7.x \
+ DEPTH=20 \
+ REPORT_FORMAT="checkstyle" \
+ REPORT_PATH="/reports" \
+ REPORT_FILENAME="checkstyle-result.xml" \
  EXTENSIONS="php|module|inc|install|test|profile|theme|js|css|info|txt" \
- INCLUDE="/" \
+ INCLUDE="." \
  DEBUG=FALSE
 
 COPY test.sh /tmp/test.sh
