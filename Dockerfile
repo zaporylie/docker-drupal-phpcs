@@ -33,6 +33,7 @@ ENV SHA=HEAD \
  DEBUG=FALSE
 
 COPY test.sh /tmp/test.sh
+COPY php.ini /usr/local/etc/php/
 
 RUN chmod +x /tmp/test.sh
 
