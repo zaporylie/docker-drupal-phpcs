@@ -52,7 +52,7 @@ IFS='|' read -r -a EXTENSIONS_ARRAY <<< "${EXTENSIONS}"
 EXTENSIONS=""
 for element in "${EXTENSIONS_ARRAY[@]}"
 do
-    EXTENSIONS="${EXTENSIONS} *.$element"
+    EXTENSIONS="${EXTENSIONS} :/*.$element"
 done
 
 if [ ${DEBUG} = TRUE ]; then
