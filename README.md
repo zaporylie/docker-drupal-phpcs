@@ -3,7 +3,7 @@ Dockerized PHPCS for Drupal projects
 
 # Quickstart
 
-`docker run --rm -ti -e SERVICE=github.com -e USERNAME=drupal -e REPOSITORY=drupal -e BRANCH=7.x zaporylie/drupalcs`
+```docker run --rm -ti -e SERVICE=github.com -e USERNAME=drupal -e REPOSITORY=drupal -e BRANCH=7.x zaporylie/drupal-phpcs```
 
 ## Variables
 
