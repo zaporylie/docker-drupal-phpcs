@@ -1,80 +1,71 @@
 #!/bin/bash
 
-if [ -e "/tmp/.ssh/id_rsa" ]; then
-	cp /tmp/.ssh/id_rsa ~/.ssh/id_rsa
-	chmod 400 ~/.ssh/id_rsa
-fi
+parse_yaml() {
+    local prefix=$2
+    local s
+    local w
+    local fs
+    s='[[:space:]]*'
+    w='[a-zA-Z0-9_]*'
+    fs="$(echo @|tr @ '\034')"
+    sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s[:-]$s\(.*\)$s\$|\1$fs\2$fs\3|p" "$1" |
+    awk -F"$fs" '{
+    indent = length($1)/2;
+    vname[indent] = $2;
+    for (i in vname) {if (i > indent) {delete vname[i]}}
+        if (length($3) > 0) {
+            vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+            printf("%s%s%s=(\"%s\")\n", "'"$prefix"'",vn, $2, $3);
+        }
+    }' | sed 's/_=/+=/g'
+}
+
+function join { local IFS="$1"; shift; echo "$*"; }
 
 if [ ${DEBUG} = TRUE ]; then
-	cat /root/.ssh/config
+	echo "PHP Code Sniffer"	
 fi
 
-if [ ${METHOD} = "http" ]; then
-	CLONE_URL="https://${SERVICE}/${USERNAME}/${REPOSITORY}.git"
-else
-	CLONE_URL="git@${SERVICE}:${USERNAME}/${REPOSITORY}.git"
+# .phpcs.yml fallback
+if [ ! -f ${PROJECT_ROOT}/.phpcs.yml ]; then
+	if [ ${DEBUG} = TRUE ]; then
+  	      echo "Missing phpcs config file, using default one"
+	fi
+
+	cp /tmp/.phpcs.yml ${PROJECT_ROOT}/.phpcs.yml
 fi
 
-if [ ${DEBUG} = TRUE ]; then
-	git clone --depth ${DEPTH} --branch ${BRANCH} ${CLONE_URL} ${CLONE_PATH} 2>&1
-else
-	git clone --depth ${DEPTH} --branch ${BRANCH} ${CLONE_URL} ${CLONE_PATH} > /dev/null 2>&1
+# Parse YAML
+eval $(parse_yaml ${PROJECT_ROOT}/.phpcs.yml "config_")
+
+#
+# Params.
+#
+
+PARAMS=""
+
+# Standard.
+if [ ! -z "${config_standard}" ]; then
+	PARAMS="$PARAMS --standard=${config_standard}"
 fi
 
-# Check if error.
-if [ $? -ne 0 ]; then
-	echo "Clone error"
-	exit $?
+# Extension.
+if [ ! -z "${config_filter_extension}" ]; then
+        PARAMS="$PARAMS --extensions=$(join , ${config_filter_extension[@]})"
 fi
 
-cd ${CLONE_PATH} > /dev/null 2>&1
-git checkout ${SHA} > /dev/null 2>&1
-
-# Check if error.
-if [ $? -ne 0 ]; then
-	echo "Checkout error";
-        exit $?
-fi
-
-git reset ${SHA} > /dev/null 2>&1
-
-# Check if error.
-if [ $? -ne 0 ]; then
-	echo "Reset error"
-        exit $?
-fi
-
-if [ ${DEBUG} = TRUE ]; then
-	git log --pretty=oneline
-fi
-
-IFS='|' read -r -a EXTENSIONS_ARRAY <<< "${EXTENSIONS}"
-EXTENSIONS=""
-for element in "${EXTENSIONS_ARRAY[@]}"
-do
-    EXTENSIONS="${EXTENSIONS} :/*.$element"
+# Folder
+for i in "${!config_filter_folder[@]}"; do
+	if [ -d "${config_filter_folder[$i]}" ]; then
+		$HOME/.composer/vendor/bin/phpcs $PARAMS  ${config_filter_folder[$i]}
+	else
+		unset config_filter_folder[$i]
+	fi
 done
 
-if [ ${DEBUG} = TRUE ]; then
-	echo "all"
-        git diff --diff-filter=ACMRTUXB --name-only ${SHA_BEFORE}
-	echo "only matching extensions: ${EXTENSIONS}"
-        git diff --diff-filter=ACMRTUXB --name-only ${SHA_BEFORE} --${EXTENSIONS}
-	echo "only matching extensions ${EXTENSIONS} and include pattern ${INCLUDE}"
-        git diff --diff-filter=ACMRTUXB --name-only ${SHA_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE}
+if [ ! -z "${config_filter_folder}" ]; then
+        echo "No folder found"
+        exit 100;
 fi
 
-
-FILES=$(git diff --diff-filter=ACMRTUXB --name-only ${SHA_BEFORE} --${EXTENSIONS} | grep -E ${INCLUDE} | tr "\\n" " ")
-
-if [ -z "$FILES" ]; then
-        echo "No files"
-        exit 0;
-fi
-
-if [ ${DEBUG} = TRUE ]; then
-	echo "Files:"
-        echo ${FILES}
-fi
-
-$HOME/.composer/vendor/bin/phpcs --standard=$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal --report-${REPORT_FORMAT}=${REPORT_PATH}/${REPORT_FILENAME} --report-full $FILES
