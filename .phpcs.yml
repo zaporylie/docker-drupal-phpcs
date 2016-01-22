@@ -18,8 +18,7 @@ filter:
     - info
     - txt
   folder:
-    - sites/all/module/custom
-    - sites/all/theme/custom
-    - module/custom
-    - theme/custom
-
+    - sites/all/modules/custom
+    - sites/all/themes/custom
+    - modules/custom
+    - themes/custom
