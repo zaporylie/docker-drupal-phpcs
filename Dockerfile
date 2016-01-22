@@ -15,10 +15,10 @@ ENV SHA=HEAD \
  PROJECT_ROOT="/var/www/html" \
  DEBUG=FALSE
 
-COPY test.sh /tmp/test.sh
+COPY phpcs.sh /tmp/phpcs.sh
 COPY php.ini /usr/local/etc/php/
 COPY .phpcs.yml /tmp/.phpcs.yml
 
-RUN chmod +x /tmp/test.sh
+RUN chmod +x /tmp/phpcs.sh
 
-CMD ["/tmp/test.sh"]
+CMD ["/tmp/phpcs.sh"]
