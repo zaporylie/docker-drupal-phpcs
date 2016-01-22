@@ -32,12 +32,17 @@ if [ ! -f ${PROJECT_ROOT}/.phpcs.yml ]; then
 	if [ ${DEBUG} = TRUE ]; then
   	      echo "Missing phpcs config file, using default one"
 	fi
+	eval $(parse_yaml /tmp/.phpcs.yml "config_")
+else
+	eval $(parse_yaml ${PROJECT_ROOT}/.phpcs.yml "config_")
 
-	cp /tmp/.phpcs.yml ${PROJECT_ROOT}/.phpcs.yml
 fi
 
-# Parse YAML
-eval $(parse_yaml ${PROJECT_ROOT}/.phpcs.yml "config_")
+# Enter project root
+cd ${PROJECT_ROOT}
+if [ ${DEBUG} = TRUE ]; then
+        ls -la
+fi
 
 #
 # Params.
@@ -55,11 +60,24 @@ if [ ! -z "${config_filter_extension}" ]; then
         PARAMS="$PARAMS --extensions=$(join , ${config_filter_extension[@]})"
 fi
 
+if [ ${DEBUG} = TRUE ]; then
+        echo "Params: ${PARAMS}"
+fi
+
 # Folder
 for i in "${!config_filter_folder[@]}"; do
-	if [ -d "${config_filter_folder[$i]}" ]; then
-		$HOME/.composer/vendor/bin/phpcs $PARAMS  ${config_filter_folder[$i]}
+	if [ -d "./${config_filter_folder[$i]}" ]; then
+		if [ ${DEBUG} = TRUE ]; then
+			echo "Running Code Snffer on: ${config_filter_folder[$i]}"
+		fi
+		$HOME/.composer/vendor/bin/phpcs$PARAMS  ${config_filter_folder[$i]}
+		if [ $? -ne 0 ]; then
+			ERROR=1
+		fi
 	else
+		if [ ${DEBUG} = TRUE ]; then
+                        echo "Missing directory: ${config_filter_folder[$i]}"
+                fi
 		unset config_filter_folder[$i]
 	fi
 done
@@ -69,3 +87,6 @@ if [ ! -z "${config_filter_folder}" ]; then
         exit 100;
 fi
 
+if [ ! -z "${ERROR}" ] && [ "${ERROR}" == "1" ]; then
+	exit 1;
+fi
