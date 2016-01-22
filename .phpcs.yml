@@ -1,0 +1,24 @@
+standard: "$HOME/.composer/vendor/drupal/coder/coder_sniffer/Drupal"
+report:
+  format: "checkstyle"
+  path: "./"
+  filename: "checkstyle-result.xml"
+  full: true
+filter:
+  extension:
+    - php
+    - module
+    - inc
+    - install
+    - test
+    - profile
+    - theme
+    - js
+    - css
+    - info
+    - txt
+  folder:
+    - sites/all/modules/custom
+    - sites/all/themes/custom
+    - modules/custom
+    - themes/custom
